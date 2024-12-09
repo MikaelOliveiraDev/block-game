@@ -37,7 +37,6 @@ grid.createSpaces = function () {
   }
 };
 grid.put = function(item, row, col) {
-  console.log(row, col, grid.spaces[row], item)
   if(!Array.isArray(grid.spaces[row]))
     console.error(`grid row ${row} does not exists`)
   if (grid.spaces[row][col] === undefined)
@@ -54,7 +53,7 @@ grid.put = function(item, row, col) {
   grid.spaces[row][col] = item
   return removed
 }
-grid.loopThroughItems = function (func, ) {
+grid.loopThroughItems = function (func) {
   for (let row = 0; row < grid.verLength; row++) {
     for (let col = 0; col < grid.horLength; col++) {
       func(grid.spaces[row][col], row, col);
@@ -116,10 +115,6 @@ composition.loopThroughItems = function(func) {
 
 }
 
-function clr() {
-  console.clear()
-}
-
 class Block {
   constructor() {
     this.width = grid.spaceSize - 4;
@@ -127,7 +122,6 @@ class Block {
     this.relY = 2;
     this.relOrigin;
     this.gridPosition = {col: null, row: null}
-    this.color = "#f58d8d";
     this.animation = {};
     this.color = ["#FF4858", "#1B7F79", "#00CCC0", "#72F2EB", "#747F7F"][
       Math.floor(Math.random() * 5)
@@ -177,8 +171,6 @@ class Block {
       if (block == this) return // don't compare with same
       if (block.gridPosition.row < this.gridPosition.row) return
       
-      block.color = "black"
-      console.log(this.y2, block.y, this.y2 > block.y)
       if (this.y2 > block.y) 
         hit = true
     })
@@ -200,11 +192,16 @@ class Block {
     grid.spaces[this.gridPosition.row][this.gridPosition.col] = null
     composition.remove(this)
     
-    let col = this.gridPosition.col 
-    let row = this.gridPosition.row 
-    let upper = grid.spaces[row - 1][col]
-    if(upper instanceof Block)
-    upper.animation.fall = true
+    // Activate fall animation on upper blocks
+    grid.loopThroughItems((item, row, col) => {
+      if(col !== this.gridPosition.col)
+        return //console.log(`Não é a mesma coluna\nthis.col = ${this,this.gridPosition.col}, col = ${col}`)
+      if(!(item instanceof Block)) 
+        return //console.log("não é bloco", item, row, col)
+
+      if(row < this.gridPosition.row)
+        item.animation.fall = true
+    })
   }
   update() {
     if (this.animation.fall) this.animateFall();
