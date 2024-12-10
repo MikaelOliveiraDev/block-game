@@ -122,9 +122,10 @@ class Block {
     this.relY = 2;
     this.relOrigin;
     this.gridPosition = {col: null, row: null}
-    this.animation = {};
     this.color = ["#FF4858", "#1B7F79", "#00CCC0", "#72F2EB", "#747F7F"][Math.floor(Math.random() * 5)];
+    this.state = "idle"
     this.opacity = 1
+    this.eventListeners = {}
   }
 
   get x() {
@@ -152,11 +153,27 @@ class Block {
     return this.y + this.width
   }
 
-  animateFade() {
-    let animation = this.animation
+  // Methods for adding and emitting event listeners
+  on(event, callback) {
+    if (!this.eventListeners[event]) {
+      this.eventListeners[event] = [];
+    }
+    this.eventListeners[event].push(callback);
+  }
+  emit(event, data) {
+    if (this.eventListeners[event]) {
+      this.eventListeners[event].forEach((callback) => callback(data));
+    }
+  }
+  off(event, callback) {
+    if (this.eventListeners[event]) {
+      this.eventListeners[event] = this.eventListeners[event].filter(cb => cb !== callback);
+    }
+  }
+  
+  // State updating
+  updateFade() {
     let grow = 2
-    
-    animation.fadeCount === undefined ? animation.count = 0 : animation.fadeCount++
 
     this.opacity -= .1
     this.width += grow
@@ -165,14 +182,15 @@ class Block {
 
     if (this.opacity < 0) {
       this.opacity = 0
-      composition.remove(this)
+      this.emit("fadeEnd", {
+        target: this
+      })
     }
   }
-  animateFall() {
+  updateFall() {
     this.y += 6;
     
     let hit = false
-
     
     // Check if hit the ground
     if (this.y2 > grid.y + grid.height)
@@ -191,13 +209,14 @@ class Block {
     })
 
     if(hit) {
-      this.animation.fall = false;
+      this.state = "idle";
       let col = Math.round(this.relX / grid.spaceSize);
       let row = Math.round(this.relY / grid.spaceSize);
       
       grid.put(this, row, col)
     }
   }
+  // Click and point handler
   isPointInside(x, y) {
     if(this.x < x && x < this.x2 && this.y < y && y < this.y2) 
       return true 
@@ -205,9 +224,11 @@ class Block {
   click() {
     // Remove from grid and composition
     grid.spaces[this.gridPosition.row][this.gridPosition.col] = null
-    //composition.remove(this)
 
-    this.animation.fade = true
+    this.state = "fading"
+    this.on("fadeEnd", (ev) => {
+      composition.remove(ev.target)
+    })
     
     // Activate fall animation on upper blocks
     grid.loopThroughItems((item, row, col) => {
@@ -216,13 +237,25 @@ class Block {
       if(!(item instanceof Block)) 
         return //console.log("não é bloco", item, row, col)
 
-      if(row < this.gridPosition.row)
-        item.animation.fall = true
+      if(row < this.gridPosition.row) {
+        item.state = "falling"
+        grid.spaces[row][col] = null
+      }
     })
   }
+  // Life circle
   update() {
-    if (this.animation.fall) this.animateFall();
-    if(this.animation.fade) this.animateFade();
+    switch (this.state) {
+      case "falling":
+        this.updateFall();
+        break;
+      case "fading":
+        this.updateFade();
+        break;
+      case "idle":
+      default:
+        break;
+    }
   }
   draw() {
     let x = this.x;
