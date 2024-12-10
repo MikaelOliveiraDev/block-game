@@ -123,9 +123,8 @@ class Block {
     this.relOrigin;
     this.gridPosition = {col: null, row: null}
     this.animation = {};
-    this.color = ["#FF4858", "#1B7F79", "#00CCC0", "#72F2EB", "#747F7F"][
-      Math.floor(Math.random() * 5)
-    ];
+    this.color = ["#FF4858", "#1B7F79", "#00CCC0", "#72F2EB", "#747F7F"][Math.floor(Math.random() * 5)];
+    this.opacity = 1
   }
 
   get x() {
@@ -153,6 +152,22 @@ class Block {
     return this.y + this.width
   }
 
+  animateFade() {
+    let animation = this.animation
+    let grow = 2
+    
+    animation.fadeCount === undefined ? animation.count = 0 : animation.fadeCount++
+
+    this.opacity -= .1
+    this.width += grow
+    this.relX -= grow / 2
+    this.relY -= grow / 2
+
+    if (this.opacity < 0) {
+      this.opacity = 0
+      composition.remove(this)
+    }
+  }
   animateFall() {
     this.y += 6;
     
@@ -190,7 +205,9 @@ class Block {
   click() {
     // Remove from grid and composition
     grid.spaces[this.gridPosition.row][this.gridPosition.col] = null
-    composition.remove(this)
+    //composition.remove(this)
+
+    this.animation.fade = true
     
     // Activate fall animation on upper blocks
     grid.loopThroughItems((item, row, col) => {
@@ -205,12 +222,15 @@ class Block {
   }
   update() {
     if (this.animation.fall) this.animateFall();
+    if(this.animation.fade) this.animateFade();
   }
   draw() {
     let x = this.x;
     let y = this.y;
     let width = this.width;
     let radius = 10;
+
+    ctx.globalAlpha = this.opacity
     
     // Draw the rounded corner square
     ctx.beginPath();
@@ -261,6 +281,8 @@ class Block {
     //ctx.lineWidth = 2
     //ctx.stroke()
     ctx.closePath();
+
+    ctx.globalAlpha = 1
   }
 }
 
