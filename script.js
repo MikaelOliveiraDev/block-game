@@ -60,6 +60,32 @@ grid.loopThroughItems = function (func) {
     }
   }
 };
+grid.getSurroudings = function(gridPosition, distance = 1, type) {
+  let { row, col } = gridPosition
+  let surroundings = []
+
+  switch(type) {
+    case "cross":
+      for (let r = row - distance; r <= row + distance; r++)
+        if (r !== row) // prevent select same position
+          if (this.spaces[r] && this.spaces[r][col] != undefined) // prevent positions out of grid
+            surroundings.push(this.spaces[r][col])
+      for (let c = col - distance; c <= col + distance; c++)
+        if (c !== col) // prevent select same positon
+          if(this.spaces[row] && this.spaces[row][c] != undefined) // prevent positions out of grid
+            surroundings.push(this.spaces[row][c])
+      break;
+    case "block":
+    default:
+      for (let r = row - distance; r <= row + distance; r++) 
+        for (let c = col - distance; c <= col + distance; c++)
+          if (!(r === row && c === col)) // prevent select same position
+            if (this.spaces[r] && this.spaces[r][c] != undefined) // prevent positions out of grid
+            surroundings.push(this.spaces[r][c])
+  }
+
+  return surroundings
+}
 grid.draw = function () {
   ctx.fillStyle = "rgb(220, 229, 232)";
   ctx.fillRect(this.x, this.y, this.width, this.height);
@@ -222,7 +248,7 @@ class Block {
       return true 
   }
   pop() {
-    // Remove from grid and composition
+    // Remove from grid 
     grid.spaces[this.gridPosition.row][this.gridPosition.col] = null
 
     this.state = "fading"
@@ -244,15 +270,14 @@ class Block {
     })
   }
   click() {
-    this.pop()
-    // Check if surroundings are the same color as this
-    let { row, col } = this.gridPosition
-    console.log(row, col)
-    for (let r = row - 1; r <= row + 1; r++) 
-      for (let c = col - 1; c <= col + 1; c++)
-        if(grid.spaces[r][c] instanceof Block && grid.spaces[r][c].color === this.color)
-          grid.spaces[r][c].pop()
+    // Activate pop() on the surrounding blocks with same color
+    grid.getSurroudings(this.gridPosition, 1, "cross").forEach((item) => {
+      if(item instanceof Block && item.color == this.color) {
+        item.pop()
+      }
+    })
     
+    this.pop()
   }
   // Life circle
   update() {
