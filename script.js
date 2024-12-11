@@ -221,7 +221,7 @@ class Block {
     if(this.x < x && x < this.x2 && this.y < y && y < this.y2) 
       return true 
   }
-  click() {
+  pop() {
     // Remove from grid and composition
     grid.spaces[this.gridPosition.row][this.gridPosition.col] = null
 
@@ -229,7 +229,7 @@ class Block {
     this.on("fadeEnd", (ev) => {
       composition.remove(ev.target)
     })
-    
+
     // Activate fall animation on upper blocks
     grid.loopThroughItems((item, row, col) => {
       if(col !== this.gridPosition.col)
@@ -242,6 +242,17 @@ class Block {
         grid.spaces[row][col] = null
       }
     })
+  }
+  click() {
+    this.pop()
+    // Check if surroundings are the same color as this
+    let { row, col } = this.gridPosition
+    console.log(row, col)
+    for (let r = row - 1; r <= row + 1; r++) 
+      for (let c = col - 1; c <= col + 1; c++)
+        if(grid.spaces[r][c] instanceof Block && grid.spaces[r][c].color === this.color)
+          grid.spaces[r][c].pop()
+    
   }
   // Life circle
   update() {
