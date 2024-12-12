@@ -93,25 +93,25 @@ grid.getSurroudings = function(gridPosition, distance = 1, type) {
 
   return surroundings
 }
-grid.getColorGroup = function (startBlock, color) {
+grid.getGroup = function (startItem, groupCondition) {
   let group = [];
 
-  function searchConnectedBlocks(block) {
+  function searchConnectedItems(item) {
     // Already verified?
-    if (group.includes(block)) return;
+    if (group.includes(item)) return;
 
-    // Add to group if it's the same color
-    if (block instanceof Block && block.color === color) {
-      group.push(block);
+    // Add to group if matches condition
+    if (groupCondition(item)) {
+      group.push(item);
 
       // Do the same with surroundings
-      grid.getSurroudings(block.gridPosition, 1, "cross").forEach((nearBlock) => {
-        searchConnectedBlocks(nearBlock);
+      grid.getSurroudings(item.gridPosition, 1, "cross").forEach((surroundItem) => {
+        searchConnectedItems(surroundItem);
       });
     }
   }
 
-  searchConnectedBlocks(startBlock);
+  searchConnectedItems(startItem);
   return group;
 };
 
@@ -297,8 +297,9 @@ class Block {
     }, undefined, this.gridPosition.col)
   }
   click() {
-    // Pop every block in the same color group
-    grid.getColorGroup(this, this.color).forEach(block => block.pop());
+    // Pop every block in the same color 
+    let color = this.color
+    grid.getGroup(this, item => item.color === color).forEach(block => block.pop());
   }
 
   update() {
