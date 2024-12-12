@@ -93,6 +93,28 @@ grid.getSurroudings = function(gridPosition, distance = 1, type) {
 
   return surroundings
 }
+grid.getColorGroup = function (startBlock, color) {
+  let group = [];
+
+  function searchConnectedBlocks(block) {
+    // Already verified?
+    if (group.includes(block)) return;
+
+    // Add to group if it's the same color
+    if (block instanceof Block && block.color === color) {
+      group.push(block);
+
+      // Do the same with surroundings
+      grid.getSurroudings(block.gridPosition, 1, "cross").forEach((nearBlock) => {
+        searchConnectedBlocks(nearBlock);
+      });
+    }
+  }
+
+  searchConnectedBlocks(startBlock);
+  return group;
+};
+
 grid.draw = function () {
   ctx.fillStyle = "rgb(220, 229, 232)";
   ctx.fillRect(this.x, this.y, this.width, this.height);
@@ -253,20 +275,6 @@ class Block {
     if(this.x < x && x < this.x2 && this.y < y && y < this.y2) 
       return true 
   }
-  getColorGroup(group = [], color = this.color) {
-    // A color group includes all the same color blocks that are connected to each other
-    
-    grid.getSurroudings(this.gridPosition, 1, "cross").forEach((nearItem) => {
-      if(nearItem instanceof Block) 
-        if(nearItem.color === color) 
-          if(!(group.includes(nearItem))) {
-            group.push(nearItem)
-            nearItem.getColorGroup(group, color)
-          }
-    })
-
-    return group
-  }
   pop() {
     // Remove from grid 
     grid.spaces[this.gridPosition.row][this.gridPosition.col] = null
@@ -290,7 +298,7 @@ class Block {
   }
   click() {
     // Pop every block in the same color group
-    this.getColorGroup().forEach(block => block.pop())
+    grid.getColorGroup(this, this.color).forEach(block => block.pop());
   }
 
   update() {
