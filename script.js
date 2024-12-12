@@ -197,7 +197,7 @@ class Block {
     }
   }
   
-  // State updating
+  
   updateFade() {
     let grow = 2
 
@@ -242,10 +242,24 @@ class Block {
       grid.put(this, row, col)
     }
   }
-  // Click and point handler
+
   isPointInside(x, y) {
     if(this.x < x && x < this.x2 && this.y < y && y < this.y2) 
       return true 
+  }
+  getColorGroup(group = [], color = this.color) {
+    // A color group includes all the same color blocks that are connected to each other
+    
+    grid.getSurroudings(this.gridPosition, 1, "cross").forEach((nearItem) => {
+      if(nearItem instanceof Block) 
+        if(nearItem.color === color) 
+          if(!(group.includes(nearItem))) {
+            group.push(nearItem)
+            nearItem.getColorGroup(group, color)
+          }
+    })
+
+    return group
   }
   pop() {
     // Remove from grid 
@@ -270,16 +284,10 @@ class Block {
     })
   }
   click() {
-    // Activate pop() on the surrounding blocks with same color
-    grid.getSurroudings(this.gridPosition, 1, "cross").forEach((item) => {
-      if(item instanceof Block && item.color == this.color) {
-        item.pop()
-      }
-    })
-    
-    this.pop()
+    // Pop every block in the same color group
+    this.getColorGroup().forEach(block => block.pop())
   }
-  // Life circle
+
   update() {
     switch (this.state) {
       case "falling":
