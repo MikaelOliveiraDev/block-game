@@ -6,7 +6,6 @@ let grid = {
   x: null,
   height: null,
   width: null,
-  height: null,
   spaceSize: null,
   horLength: null,
   verLength: null,
@@ -53,10 +52,18 @@ grid.put = function(item, row, col) {
   grid.spaces[row][col] = item
   return removed
 }
-grid.loopThroughItems = function (func) {
-  for (let row = 0; row < grid.verLength; row++) {
-    for (let col = 0; col < grid.horLength; col++) {
-      func(grid.spaces[row][col], row, col);
+grid.loopThroughItems = function (func, row, col) {
+  if (typeof row === 'number') {
+    for (let c = 0; c < grid.horLength; c++)
+      func(grid.spaces[row][c]);
+  } else if (typeof col === 'number') {
+    for (let r = 0; r < grid.verLength; r++) 
+      func(grid.spaces[r][col]);
+  } else {
+    for (let r = 0; r < grid.verLength; r++) {
+      for (let c = 0; c < grid.horLength; c++) {
+        func(grid.spaces[r][c]);
+      }
     }
   }
 };
@@ -224,15 +231,14 @@ class Block {
     
     
     // Check if hit bottom of a block
-    grid.loopThroughItems((block, row, col) => {
-      if (col != this.gridPosition.col) return // only for the same column
+    grid.loopThroughItems((block) => {
       if (!block) return 
       if (block == this) return // don't compare with same
       if (block.gridPosition.row < this.gridPosition.row) return
       
       if (this.y2 > block.y) 
         hit = true
-    })
+    }, undefined, this.gridPosition.col)
 
     if(hit) {
       this.state = "idle";
@@ -271,17 +277,16 @@ class Block {
     })
 
     // Activate fall animation on upper blocks
-    grid.loopThroughItems((item, row, col) => {
-      if(col !== this.gridPosition.col)
-        return //console.log(`Não é a mesma coluna\nthis.col = ${this,this.gridPosition.col}, col = ${col}`)
+    grid.loopThroughItems((item) => {
       if(!(item instanceof Block)) 
         return //console.log("não é bloco", item, row, col)
 
+      let { row, col } = item.gridPosition
       if(row < this.gridPosition.row) {
         item.state = "falling"
         grid.spaces[row][col] = null
       }
-    })
+    }, undefined, this.gridPosition.col)
   }
   click() {
     // Pop every block in the same color group
