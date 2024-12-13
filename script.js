@@ -181,6 +181,8 @@ class Block {
     this.state = "idle"
     this.opacity = 1
     this.eventListeners = {}
+    this.velX = 0
+    this.velY = 0
   }
 
   get x() {
@@ -243,7 +245,10 @@ class Block {
     }
   }
   updateFall() {
-    this.y += 6;
+    // Adjust positions and velocities
+    const GRAVITY = 1
+    this.velY += GRAVITY
+    this.y += this.velY;
     
     let hit = false
     
@@ -264,6 +269,7 @@ class Block {
 
     if(hit) {
       this.state = "idle";
+      this.velY = 0
       let col = Math.round(this.relX / grid.spaceSize);
       let row = Math.round(this.relY / grid.spaceSize);
       
