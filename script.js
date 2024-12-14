@@ -1,6 +1,9 @@
 let canvas = document.querySelector("canvas");
 let ctx = canvas.getContext("2d");
 
+// Constants
+const COLORS = ["#ef476f", "#ffc94d", "#06d6a0", "#118ab2", "#0b5a75"]
+
 // Objects
 let grid = {
   x: null,
@@ -177,7 +180,7 @@ class Block {
     this.relY = 2;
     this.relOrigin;
     this.gridPosition = {col: null, row: null}
-    this.color = ["#FF4858", "#1B7F79", "#00CCC0", "#72F2EB", "#747F7F"][Math.floor(Math.random() * 5)];
+    this.color = COLORS[Math.floor(Math.random() * COLORS.length)]
     this.state = "idle"
     this.opacity = 1
     this.eventListeners = {}
