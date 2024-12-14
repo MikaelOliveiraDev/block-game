@@ -4,6 +4,7 @@ let ctx = canvas.getContext("2d");
 // Constants
 const COLORS = ["#ef476f", "#ffc94d", "#06d6a0", "#118ab2", "#0b5a75"]
 
+
 // Objects
 let grid = {
   x: null,
@@ -117,11 +118,11 @@ grid.getGroup = function (startItem, groupCondition) {
   searchConnectedItems(startItem);
   return group;
 };
-
 grid.draw = function () {
   ctx.fillStyle = "rgb(220, 229, 232)";
   ctx.fillRect(this.x, this.y, this.width, this.height);
 };
+
 // Composition functions
 composition.include = function (item, layer) {
   let instance = item.constructor.name;
@@ -173,6 +174,8 @@ composition.loopThroughItems = function(func) {
 
 }
 
+
+// UI objects
 class Block {
   constructor() {
     this.width = grid.spaceSize - 4;
@@ -378,8 +381,6 @@ class Block {
     ctx.globalAlpha = 1
   }
 }
-
-// UI objects
 class Button {
   constructor(x, y, width, height) {
     this.x = x ?? null
@@ -449,6 +450,40 @@ class Button {
   }
 }
 
+
+// Game logic
+function includeBlock() {
+  //let row = Math.floor(Math.random() * grid.verLength)
+  let col = Math.floor(Math.random() * grid.horLength);
+
+  let block = new Block();
+  block.relOrigin = grid;
+  block.relX = col * grid.spaceSize;
+  block.relY = -grid.spaceSize;
+  block.animation.fall = true;
+
+  composition.include(block, 3);
+}
+
+
+// Events
+function mousedown(ev) {
+  ev.preventDefault()
+
+  let box = canvas.getBoundingClientRect()
+  let x = ev.clientX - box.x
+  let y = ev.clientY - box.y
+
+  // Check if mouse went down to an item in composition
+  composition.loopThroughItems((item) => {
+    if(item.isPointInside && item.isPointInside(x, y)) 
+      if(item instanceof Block) item.click()
+  })
+}
+canvas.addEventListener("mousedown", mousedown)
+
+
+// Initialization
 function update() {
   requestAnimationFrame(update);
 
@@ -468,36 +503,6 @@ function update() {
     }
   }
 }
-function includeBlock() {
-  //let row = Math.floor(Math.random() * grid.verLength)
-  let col = Math.floor(Math.random() * grid.horLength);
-
-  let block = new Block();
-  block.relOrigin = grid;
-  block.relX = col * grid.spaceSize;
-  block.relY = -grid.spaceSize;
-  block.animation.fall = true;
-
-  composition.include(block, 3);
-}
-
-// Events
-function mousedown(ev) {
-  ev.preventDefault()
-
-  let box = canvas.getBoundingClientRect()
-  let x = ev.clientX - box.x
-  let y = ev.clientY - box.y
-
-  // Check if mouse went down to an item in composition
-  composition.loopThroughItems((item) => {
-    if(item.isPointInside && item.isPointInside(x, y)) 
-      if(item instanceof Block) item.click()
-  })
-}
-canvas.addEventListener("mousedown", mousedown)
-
-// Initialization
 canvas.width = 500;
 canvas.height = 700;
 
