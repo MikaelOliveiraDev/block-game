@@ -391,6 +391,7 @@ class Button {
     this.width = width ?? null
     this.height = height ?? null
     this.color = "#ffd24d"
+    this.image = null
   }
 
   draw() {
@@ -448,7 +449,14 @@ class Button {
     //ctx.stroke()
     ctx.closePath();
 
-    ctx.globalAlpha = 1
+    if (this.image) {
+      const margin = this.width * .15
+      const x = this.x + margin
+      const y = this.y + margin
+      const width = this.width - margin * 2
+      const height = this.height - margin * 2
+      ctx.drawImage(this.image, x, y, width, height)
+    }
   }
 }
 
@@ -506,7 +514,9 @@ canvas.height = 700;
 
 let backButton = new Button(5, 5, 50, 50)
 let retryButton = new Button(null, 5, 50, 50)
+backButton.image = document.querySelector("img.back-arrow")
 retryButton.x = canvas.width - retryButton.width - 5
+retryButton.image = document.querySelector("img.circular-arrow")
 composition.include(backButton, 7)
 composition.include(retryButton, 7)
 
