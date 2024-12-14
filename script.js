@@ -383,13 +383,79 @@ class Block {
   }
 }
 
+// UI objects
+class Button {
+  constructor(x, y, width, height) {
+    this.x = x ?? null
+    this.y = y ?? null
+    this.width = width ?? null
+    this.height = height ?? null
+    this.color = "#ffd24d"
+  }
+
+  draw() {
+    let { x, y, width, height } = this 
+    let radius = 10
+
+    // Draw the rounded corner square
+    ctx.beginPath();
+    ctx.moveTo(x + radius, y);
+    ctx.lineTo(x + width - radius, y);
+    ctx.quadraticCurveTo(x + width, y, x + width, y + radius);
+    ctx.lineTo(x + width, y + height - radius);
+    ctx.quadraticCurveTo(x + width, y + height, x + width - radius, y + height);
+    ctx.lineTo(x + radius, y + height);
+    ctx.quadraticCurveTo(x, y + height, x, y + height - radius);
+    ctx.lineTo(x, y + radius);
+    ctx.quadraticCurveTo(x, y, x + radius, y);
+    ctx.fillStyle = this.color;
+    ctx.fill();
+    ctx.closePath();
 
 
+    // Add the shadow inside the bottom edge
+
+    /* The coordinates of the shadow area are as the following:
+    c0─────c5    - c0 represents the coordinate x0 and y0.
+    │       │    - if a value of x is used in c0 and c1,
+    c1      c4     then x is named x01.
+    ╰─c2─c3─╯
+    */
+    let x01 = x
+    let x2 = x + radius
+    let x3 = x + width - radius
+    let x45 = x + width
+    let y05 = y + height*.8 // the top point of the shadow area
+    let y14 = y + height - radius
+    let y23 = y + height
+
+    let shadowGradient = ctx.createLinearGradient(x, y + height, x, y05);
+    shadowGradient.addColorStop(0, "rgba(0, 0, 0, 0.25)");
+    shadowGradient.addColorStop(1, "rgba(0, 0, 0, 0.01)");
+
+    ctx.fillStyle = shadowGradient;
+    
+    ctx.beginPath();
+    ctx.moveTo(x01, y05);
+    ctx.lineTo(x01, y14);
+    ctx.quadraticCurveTo(x, y + height, x2, y23);
+    ctx.lineTo(x3, y23);
+    ctx.quadraticCurveTo(x + width, y + height, x45, y14);
+    ctx.lineTo(x45, y05);
+    ctx.fill();
+    //ctx.strokeStyle = "red"
+    //ctx.lineWidth = 2
+    //ctx.stroke()
+    ctx.closePath();
+
+    ctx.globalAlpha = 1
+  }
+}
 
 function update() {
   requestAnimationFrame(update);
 
-  ctx.fillStyle = "white";
+  ctx.fillStyle = "lightgreen";
   ctx.fillRect(0, 0, canvas.width, canvas.height);
 
   // Update and draw items of the composition
@@ -435,8 +501,15 @@ function mousedown(ev) {
 canvas.addEventListener("mousedown", mousedown)
 
 // Initialization
-canvas.width = 400;
-canvas.height = 500;
+canvas.width = 500;
+canvas.height = 700;
+
+let backButton = new Button(5, 5, 50, 50)
+let retryButton = new Button(null, 5, 50, 50)
+retryButton.x = canvas.width - retryButton.width - 5
+composition.include(backButton, 7)
+composition.include(retryButton, 7)
+
 
 grid.width = 400;
 grid.height = 450;
