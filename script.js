@@ -335,14 +335,7 @@ class Block {
     // Draw the rounded corner square
     ctx.beginPath();
     ctx.moveTo(x + radius, y);
-    ctx.lineTo(x + width - radius, y);
-    ctx.quadraticCurveTo(x + width, y, x + width, y + radius);
-    ctx.lineTo(x + width, y + width - radius);
-    ctx.quadraticCurveTo(x + width, y + width, x + width - radius, y + width);
-    ctx.lineTo(x + radius, y + width);
-    ctx.quadraticCurveTo(x, y + width, x, y + width - radius);
-    ctx.lineTo(x, y + radius);
-    ctx.quadraticCurveTo(x, y, x + radius, y);
+    ctx.roundRect(x, y, width, width, radius)
     ctx.fillStyle = this.color;
     ctx.fill();
     ctx.closePath();
@@ -404,14 +397,7 @@ class Button {
     // Draw the rounded corner square
     ctx.beginPath();
     ctx.moveTo(x + radius, y);
-    ctx.lineTo(x + width - radius, y);
-    ctx.quadraticCurveTo(x + width, y, x + width, y + radius);
-    ctx.lineTo(x + width, y + height - radius);
-    ctx.quadraticCurveTo(x + width, y + height, x + width - radius, y + height);
-    ctx.lineTo(x + radius, y + height);
-    ctx.quadraticCurveTo(x, y + height, x, y + height - radius);
-    ctx.lineTo(x, y + radius);
-    ctx.quadraticCurveTo(x, y, x + radius, y);
+    ctx.roundRect(x, y, width, height, radius)
     ctx.fillStyle = this.color;
     ctx.fill();
     ctx.closePath();
