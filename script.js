@@ -296,6 +296,9 @@ class Block {
       composition.remove(ev.target)
     })
 
+    // Try to insert a new block
+    insertBlock()
+
     // Activate fall animation on upper blocks
     grid.loopThroughItems((item) => {
       if(!(item instanceof Block)) 
@@ -464,6 +467,19 @@ function includeBlock() {
 
   composition.include(block, 3);
 }
+function insertBlock() {
+  let col = Math.floor(Math.random() * grid.verLength)
+
+  if (grid.spaces[0][col] === null) {
+  let block = new Block()
+  block.gridPosition.col = col
+  block.relOrigin = grid
+  block.relX = grid.spaceSize * col
+  block.relY = 0
+  block.state = "falling"
+  composition.include(block, 5)
+  }
+}
 
 
 // Events
@@ -485,7 +501,8 @@ canvas.addEventListener("mousedown", mousedown)
 
 // Initialization
 function update() {
-  requestAnimationFrame(update);
+  //requestAnimationFrame(update);
+  setTimeout(update, 500)
 
   ctx.fillStyle = "lightgreen";
   ctx.fillRect(0, 0, canvas.width, canvas.height);
