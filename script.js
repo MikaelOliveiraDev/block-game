@@ -2,8 +2,7 @@ let canvas = document.querySelector("canvas");
 let ctx = canvas.getContext("2d");
 
 // Constants
-const COLORS = ["#ef476f", "#ffc94d", "#06d6a0", "#118ab2", "#0b5a75"]
-
+const COLORS = ["#ef476f", "#ffc94d", "#06d6a0", "#118ab2", "#0b5a75"];
 
 // Objects
 let grid = {
@@ -18,7 +17,7 @@ let grid = {
 let composition = {
   // the items that are present in the screen/game
   layers: [],
-  instances: []
+  instances: [],
 };
 let pool = {
   // the items that are NOT present in the screen/game
@@ -39,30 +38,27 @@ grid.createSpaces = function () {
     }
   }
 };
-grid.put = function(item, row, col) {
-  if(!Array.isArray(grid.spaces[row]))
-    console.error(`grid row ${row} does not exists`)
+grid.put = function (item, row, col) {
+  if (!Array.isArray(grid.spaces[row]))
+    console.error(`grid row ${row} does not exists`);
   if (grid.spaces[row][col] === undefined)
-    console.error(`grid column ${col} does not exists`, grid.spaces[row])
+    console.error(`grid column ${col} does not exists`, grid.spaces[row]);
+  if (grid.spaces[row][col] !== null)
+    console.error(`The grid position [${row}][${col}] is already occupied`)
 
-  
-  item.relX = col * grid.spaceSize
-  item.relY = row * grid.spaceSize
+  item.relX = col * grid.spaceSize;
+  item.relY = row * grid.spaceSize;
   item.relOrigin = grid;
-  item.gridPosition.col = col
-  item.gridPosition.row = row
-  
-  let removed = grid.spaces[row][col]
-  grid.spaces[row][col] = item
-  return removed
-}
+  item.gridPosition.col = col;
+  item.gridPosition.row = row;
+
+  grid.spaces[row][col] = item;
+};
 grid.loopThroughItems = function (func, row, col) {
-  if (typeof row === 'number') {
-    for (let c = 0; c < grid.horLength; c++)
-      func(grid.spaces[row][c]);
-  } else if (typeof col === 'number') {
-    for (let r = 0; r < grid.verLength; r++) 
-      func(grid.spaces[r][col]);
+  if (typeof row === "number") {
+    for (let c = 0; c < grid.horLength; c++) func(grid.spaces[row][c]);
+  } else if (typeof col === "number") {
+    for (let r = 0; r < grid.verLength; r++) func(grid.spaces[r][col]);
   } else {
     for (let r = 0; r < grid.verLength; r++) {
       for (let c = 0; c < grid.horLength; c++) {
@@ -71,32 +67,38 @@ grid.loopThroughItems = function (func, row, col) {
     }
   }
 };
-grid.getSurroudings = function(gridPosition, distance = 1, type) {
-  let { row, col } = gridPosition
-  let surroundings = []
+grid.getSurroudings = function (gridPosition, distance = 1, type) {
+  let { row, col } = gridPosition;
+  let surroundings = [];
 
-  switch(type) {
+  switch (type) {
     case "cross":
       for (let r = row - distance; r <= row + distance; r++)
-        if (r !== row) // prevent select same position
-          if (this.spaces[r] && this.spaces[r][col] != undefined) // prevent positions out of grid
-            surroundings.push(this.spaces[r][col])
+        if (r !== row)
+          if (this.spaces[r] && this.spaces[r][col] != undefined)
+            // prevent select same position
+            // prevent positions out of grid
+            surroundings.push(this.spaces[r][col]);
       for (let c = col - distance; c <= col + distance; c++)
-        if (c !== col) // prevent select same positon
-          if(this.spaces[row] && this.spaces[row][c] != undefined) // prevent positions out of grid
-            surroundings.push(this.spaces[row][c])
+        if (c !== col)
+          if (this.spaces[row] && this.spaces[row][c] != undefined)
+            // prevent select same positon
+            // prevent positions out of grid
+            surroundings.push(this.spaces[row][c]);
       break;
     case "block":
     default:
-      for (let r = row - distance; r <= row + distance; r++) 
+      for (let r = row - distance; r <= row + distance; r++)
         for (let c = col - distance; c <= col + distance; c++)
-          if (!(r === row && c === col)) // prevent select same position
-            if (this.spaces[r] && this.spaces[r][c] != undefined) // prevent positions out of grid
-            surroundings.push(this.spaces[r][c])
+          if (!(r === row && c === col))
+            if (this.spaces[r] && this.spaces[r][c] != undefined)
+              // prevent select same position
+              // prevent positions out of grid
+              surroundings.push(this.spaces[r][c]);
   }
 
-  return surroundings
-}
+  return surroundings;
+};
 grid.getGroup = function (startItem, groupCondition) {
   let group = [];
 
@@ -109,9 +111,11 @@ grid.getGroup = function (startItem, groupCondition) {
       group.push(item);
 
       // Do the same with surroundings
-      grid.getSurroudings(item.gridPosition, 1, "cross").forEach((surroundItem) => {
-        searchConnectedItems(surroundItem);
-      });
+      grid
+        .getSurroudings(item.gridPosition, 1, "cross")
+        .forEach((surroundItem) => {
+          searchConnectedItems(surroundItem);
+        });
     }
   }
 
@@ -127,8 +131,8 @@ grid.draw = function () {
 composition.include = function (item, layer) {
   let instance = item.constructor.name;
 
-  let layers = this.layers
-  let instances = this.instances
+  let layers = this.layers;
+  let instances = this.instances;
 
   if (!layers[layer]) layers[layer] = [];
   if (!instances[instance]) instances[instance] = [];
@@ -140,8 +144,8 @@ composition.include = function (item, layer) {
 composition.remove = function (item) {
   let instance = item.constructor.name;
 
-  let instances = this.instances
-  let layers = this.layers
+  let instances = this.instances;
+  let layers = this.layers;
 
   let instanceIndex = instances[instance].indexOf(item);
   let layerIndex = layers[item._layer].indexOf(item);
@@ -149,31 +153,29 @@ composition.remove = function (item) {
   instances[instance].splice(instanceIndex, 1);
   layers[item._layer].splice(layerIndex, 1);
 
-  return item
+  return item;
 };
-composition.loopThroughItems = function(func) {
+composition.loopThroughItems = function (func) {
   // The parameter func:
   //    - must be a function that is executated for every item in the composition.
   //    - the item is passed to its first argument, and the layer the second.
   //    - the return value should be a boolean that determines whether the loop should continue;
 
-  let layers = composition.layers
+  let layers = composition.layers;
   for (let i = 0; i < layers.length; i++) {
-    let layer = layers[i]
+    let layer = layers[i];
     if (!layer) continue;
 
     for (let ii = 0; ii < layer.length; ii++) {
-      let item = layer[ii]
+      let item = layer[ii];
       if (item) {
-        let continueLoop = func(item, layer)
+        let continueLoop = func(item, layer);
 
-        if(continueLoop === false) return
+        if (continueLoop === false) return;
       }
     }
   }
-
-}
-
+};
 
 // UI objects
 class Block {
@@ -182,13 +184,13 @@ class Block {
     this.relX = 2;
     this.relY = 2;
     this.relOrigin;
-    this.gridPosition = {col: null, row: null}
-    this.color = COLORS[Math.floor(Math.random() * COLORS.length)]
-    this.state = "idle"
-    this.opacity = 1
-    this.eventListeners = {}
-    this.velX = 0
-    this.velY = 0
+    this.gridPosition = { col: null, row: null };
+    this.color = COLORS[Math.floor(Math.random() * COLORS.length)];
+    this.state = "idle";
+    this.opacity = 1;
+    this.eventListeners = {};
+    this.velX = 0;
+    this.velY = 0;
   }
 
   get x() {
@@ -210,10 +212,10 @@ class Block {
     this.relY = y - oriY;
   }
   get x2() {
-    return this.x + this.width
+    return this.x + this.width;
   }
   get y2() {
-    return this.y + this.width
+    return this.y + this.width;
   }
 
   // Methods for adding and emitting event listeners
@@ -230,91 +232,106 @@ class Block {
   }
   off(event, callback) {
     if (this.eventListeners[event]) {
-      this.eventListeners[event] = this.eventListeners[event].filter(cb => cb !== callback);
+      this.eventListeners[event] = this.eventListeners[event].filter(
+        (cb) => cb !== callback
+      );
     }
   }
-  
-  
-  updateFade() {
-    let grow = 2
 
-    this.opacity -= .1
-    this.width += grow
-    this.relX -= grow / 2
-    this.relY -= grow / 2
+  updateFade() {
+    let grow = 2;
+
+    this.opacity -= 0.1;
+    this.width += grow;
+    this.relX -= grow / 2;
+    this.relY -= grow / 2;
 
     if (this.opacity < 0) {
-      this.opacity = 0
+      this.opacity = 0;
       this.emit("fadeEnd", {
-        target: this
-      })
+        target: this,
+      });
     }
   }
   updateFall() {
-    // Adjust positions and velocities
-    const GRAVITY = 1
-    this.velY += GRAVITY
-    this.y += this.velY;
+    const GRAVITY = 1;
+    this.velY += GRAVITY;
     
-    let hit = false
+    const willCollide = this.checkCollisionOnMove();
     
-    // Check if hit the ground
-    if (this.y2 > grid.y + grid.height)
-      hit = true
-    
-    
-    // Check if hit bottom of a block
-    grid.loopThroughItems((block) => {
-      if (!block) return 
-      if (block == this) return // don't compare with same
-      if (block.gridPosition.row < this.gridPosition.row) return
-      
-      if (this.y2 > block.y) 
-        hit = true
-    }, undefined, this.gridPosition.col)
-
-    if(hit) {
+    if (willCollide) {
       this.state = "idle";
-      this.velY = 0
+      this.velY = 0;
+      
+      // Snap to the grid
       let col = Math.round(this.relX / grid.spaceSize);
       let row = Math.round(this.relY / grid.spaceSize);
-      
-      grid.put(this, row, col)
+      grid.put(this, row, col);
     }
   }
+  
+  checkCollisionOnMove() {
+    let nextX = this.x + this.velX
+    let nextY = this.y + this.velY
 
+    // Predict collision with the ground
+    if (nextY + this.width > grid.y + grid.height) return true
+    
+    // Step through small intervals for better collision accuracy
+    for (let stepY = this.y; stepY < nextY; stepY++) {
+
+      // Predict collision with blocks
+      let collisionDetected = false 
+      grid.loopThroughItems((block) => {
+        if (!block || block === this) return; // Skip null blocks and self
+        if (block.gridPosition.row < this.gridPosition.row) return; // Skip blocks above
+        
+        // Check collision on vertical movement
+        if (nextY + this.width > block.y) 
+          collisionDetected = true
+      }, undefined, this.gridPosition.col);
+      
+      if (collisionDetected) return true
+    }
+    
+    return false
+  }
   isPointInside(x, y) {
-    if(this.x < x && x < this.x2 && this.y < y && y < this.y2) 
-      return true 
+    if (this.x < x && x < this.x2 && this.y < y && y < this.y2) return true;
   }
   pop() {
-    // Remove from grid 
-    grid.spaces[this.gridPosition.row][this.gridPosition.col] = null
-
-    this.state = "fading"
+    // Remove from grid
+    grid.spaces[this.gridPosition.row][this.gridPosition.col] = null;
+    
+    this.state = "fading";
     this.on("fadeEnd", (ev) => {
-      composition.remove(ev.target)
-    })
-
+      composition.remove(ev.target);
+    });
+    
     // Try to insert a new block
-    insertBlock()
-
+    insertBlock();
+    
     // Activate fall animation on upper blocks
-    grid.loopThroughItems((item) => {
-      if(!(item instanceof Block)) 
-        return //console.log("não é bloco", item, row, col)
-
-      let { row, col } = item.gridPosition
-      if(row < this.gridPosition.row) {
-        item.state = "falling"
-        grid.spaces[row][col] = null
-      }
-    }, undefined, this.gridPosition.col)
+    grid.loopThroughItems(
+      (item) => {
+        if (!(item instanceof Block)) return; //console.log("não é bloco", item, row, col)
+        
+        let { row, col } = item.gridPosition;
+        if (row < this.gridPosition.row) {
+          item.state = "falling";
+          grid.spaces[row][col] = null;
+        }
+      },
+      undefined,
+      this.gridPosition.col
+    );
   }
   click() {
-    // Pop every block in the same color 
-    let color = this.color
-    grid.getGroup(this, item => item.color === color).forEach(block => block.pop());
+    // Pop every block in the same color
+    let color = this.color;
+    grid
+      .getGroup(this, (item) => item.color === color)
+      .forEach((block) => block.pop());
   }
 
   update() {
@@ -329,6 +346,8 @@ class Block {
       default:
         break;
     }
+
+    this.y += this.velY
   }
   draw() {
     let x = this.x;
@@ -336,16 +355,16 @@ class Block {
     let width = this.width;
     let radius = 10;
 
-    ctx.globalAlpha = this.opacity
-    
+    ctx.globalAlpha = this.opacity;
+
     // Draw the rounded corner square
     ctx.beginPath();
     ctx.moveTo(x + radius, y);
-    ctx.roundRect(x, y, width, width, radius)
+    ctx.roundRect(x, y, width, width, radius);
     ctx.fillStyle = this.color;
     ctx.fill();
     ctx.closePath();
-    
+
     // Add the shadow inside the bottom edge
 
     /* The coordinates of the shadow area are as the following:
@@ -354,20 +373,20 @@ class Block {
     c1      c4     then x is named x01.
     ╰─c2─c3─╯
     */
-    let x01 = x
-    let x2 = x + radius
-    let x3 = x + width - radius
-    let x45 = x + width
-    let y05 = y + width*.8 // the top point of the shadow area
-    let y14 = y + width - radius
-    let y23 = y + width
+    let x01 = x;
+    let x2 = x + radius;
+    let x3 = x + width - radius;
+    let x45 = x + width;
+    let y05 = y + width * 0.8; // the top point of the shadow area
+    let y14 = y + width - radius;
+    let y23 = y + width;
 
     let shadowGradient = ctx.createLinearGradient(x, y + width, x, y05);
     shadowGradient.addColorStop(0, "rgba(0, 0, 0, 0.25)");
     shadowGradient.addColorStop(1, "rgba(0, 0, 0, 0.01)");
 
     ctx.fillStyle = shadowGradient;
-    
+
     ctx.beginPath();
     ctx.moveTo(x01, y05);
     ctx.lineTo(x01, y14);
@@ -381,31 +400,33 @@ class Block {
     //ctx.stroke()
     ctx.closePath();
 
-    ctx.globalAlpha = 1
+    ctx.globalAlpha = 1;
+
+
+    ctx.strokeRect(this.x, this.y + this.velY, this.width, this.width)
   }
 }
 class Button {
   constructor(x, y, width, height) {
-    this.x = x ?? null
-    this.y = y ?? null
-    this.width = width ?? null
-    this.height = height ?? null
-    this.color = "#ffd24d"
-    this.image = null
+    this.x = x ?? null;
+    this.y = y ?? null;
+    this.width = width ?? null;
+    this.height = height ?? null;
+    this.color = "#ffd24d";
+    this.image = null;
   }
 
   draw() {
-    let { x, y, width, height } = this 
-    let radius = 10
+    let { x, y, width, height } = this;
+    let radius = 10;
 
     // Draw the rounded corner square
     ctx.beginPath();
     ctx.moveTo(x + radius, y);
-    ctx.roundRect(x, y, width, height, radius)
+    ctx.roundRect(x, y, width, height, radius);
     ctx.fillStyle = this.color;
     ctx.fill();
     ctx.closePath();
-
 
     // Add the shadow inside the bottom edge
 
@@ -415,20 +436,20 @@ class Button {
     c1      c4     then x is named x01.
     ╰─c2─c3─╯
     */
-    let x01 = x
-    let x2 = x + radius
-    let x3 = x + width - radius
-    let x45 = x + width
-    let y05 = y + height*.8 // the top point of the shadow area
-    let y14 = y + height - radius
-    let y23 = y + height
+    let x01 = x;
+    let x2 = x + radius;
+    let x3 = x + width - radius;
+    let x45 = x + width;
+    let y05 = y + height * 0.8; // the top point of the shadow area
+    let y14 = y + height - radius;
+    let y23 = y + height;
 
     let shadowGradient = ctx.createLinearGradient(x, y + height, x, y05);
     shadowGradient.addColorStop(0, "rgba(0, 0, 0, 0.25)");
     shadowGradient.addColorStop(1, "rgba(0, 0, 0, 0.01)");
 
     ctx.fillStyle = shadowGradient;
-    
+
     ctx.beginPath();
     ctx.moveTo(x01, y05);
     ctx.lineTo(x01, y14);
@@ -443,16 +464,15 @@ class Button {
     ctx.closePath();
 
     if (this.image) {
-      const margin = this.width * .15
-      const x = this.x + margin
-      const y = this.y + margin
-      const width = this.width - margin * 2
-      const height = this.height - margin * 2
-      ctx.drawImage(this.image, x, y, width, height)
+      const margin = this.width * 0.15;
+      const x = this.x + margin;
+      const y = this.y + margin;
+      const width = this.width - margin * 2;
+      const height = this.height - margin * 2;
+      ctx.drawImage(this.image, x, y, width, height);
     }
   }
 }
-
 
 // Game logic
 function includeBlock() {
@@ -468,41 +488,42 @@ function includeBlock() {
   composition.include(block, 3);
 }
 function insertBlock() {
-  let col = Math.floor(Math.random() * grid.verLength)
-
+  console.count()
+  let col = Math.floor(Math.random() * grid.verLength);
+  
+  console.log(grid.spaces[0][col])
   if (grid.spaces[0][col] === null) {
-  let block = new Block()
-  block.gridPosition.col = col
-  block.relOrigin = grid
-  block.relX = grid.spaceSize * col
-  block.relY = 0
-  block.state = "falling"
-  composition.include(block, 5)
+    let block = new Block();
+    block.gridPosition.col = col;
+    block.gridPosition.row = 0;
+    block.relOrigin = grid;
+    block.relX = grid.spaceSize * col;
+    block.relY = 0;
+    block.state = "falling";
+    composition.include(block, 5);
   }
 }
 
-
 // Events
 function mousedown(ev) {
-  ev.preventDefault()
+  ev.preventDefault();
 
-  let box = canvas.getBoundingClientRect()
-  let x = ev.clientX - box.x
-  let y = ev.clientY - box.y
+  let box = canvas.getBoundingClientRect();
+  let x = ev.clientX - box.x;
+  let y = ev.clientY - box.y;
 
   // Check if mouse went down to an item in composition
   composition.loopThroughItems((item) => {
-    if(item.isPointInside && item.isPointInside(x, y)) 
-      if(item instanceof Block) item.click()
-  })
+    if (item.isPointInside && item.isPointInside(x, y))
+      if (item instanceof Block) item.click();
+  });
 }
-canvas.addEventListener("mousedown", mousedown)
-
+canvas.addEventListener("mousedown", mousedown);
 
 // Initialization
 function update() {
-  //requestAnimationFrame(update);
-  setTimeout(update, 500)
+  requestAnimationFrame(update);
+  //setTimeout(update, 500)
 
   ctx.fillStyle = "lightgreen";
   ctx.fillRect(0, 0, canvas.width, canvas.height);
@@ -514,8 +535,8 @@ function update() {
 
     for (let ii = 0; ii < layers[i].length; ii++) {
       if (layers[i][ii]) {
-        if (layers[i][ii].update) layers[i][ii].update();
-        if (layers[i][ii].draw) layers[i][ii].draw();
+        if (layers[i][ii]?.update) layers[i][ii].update();
+        if (layers[i][ii]?.draw) layers[i][ii].draw();
       }
     }
   }
@@ -523,17 +544,16 @@ function update() {
 canvas.width = 500;
 canvas.height = 700;
 
-let backButton = new Button(5, 5, 50, 50)
-let retryButton = new Button(null, 5, 50, 50)
-backButton.image = document.querySelector("img.back-arrow")
-retryButton.x = canvas.width - retryButton.width - 5
-retryButton.image = document.querySelector("img.circular-arrow")
-composition.include(backButton, 7)
-composition.include(retryButton, 7)
-
+let backButton = new Button(5, 5, 50, 50);
+let retryButton = new Button(null, 5, 50, 50);
+backButton.image = document.querySelector("img.back-arrow");
+retryButton.x = canvas.width - retryButton.width - 5;
+retryButton.image = document.querySelector("img.circular-arrow");
+composition.include(backButton, 7);
+composition.include(retryButton, 7);
 
 grid.width = 400;
-grid.height = 450;
+grid.height = 600;
 grid.spaceSize = 50;
 
 grid.x = (canvas.width - grid.width) / 2;
@@ -545,11 +565,11 @@ grid.createSpaces();
 
 composition.include(grid, 1);
 
-for (let row = grid.verLength - 1; row > grid.verLength - 10; row--) {
+for (let row = grid.verLength - 1; row > grid.verLength - 4; row--) {
   for (let col = 0; col < grid.horLength; col++) {
     let block = new Block();
-    
-    grid.put(block, row,col)
+
+    grid.put(block, row, col);
     composition.include(block, 4);
   }
 }
