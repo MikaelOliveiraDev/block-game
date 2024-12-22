@@ -44,7 +44,7 @@ grid.put = function (item, row, col) {
   if (grid.spaces[row][col] === undefined)
     console.error(`grid column ${col} does not exists`, grid.spaces[row]);
   if (grid.spaces[row][col] !== null)
-    console.error(`The grid position [${row}][${col}] is already occupied`)
+    console.error(`The grid position [${row}][${col}] is already occupied`);
 
   item.relX = col * grid.spaceSize;
   item.relY = row * grid.spaceSize;
@@ -256,45 +256,47 @@ class Block {
   updateFall() {
     const GRAVITY = 1;
     this.velY += GRAVITY;
-    
+
     const willCollide = this.checkCollisionOnMove();
-    
+
     if (willCollide) {
       this.state = "idle";
       this.velY = 0;
-      
+
       // Snap to the grid
       let col = Math.round(this.relX / grid.spaceSize);
       let row = Math.round(this.relY / grid.spaceSize);
       grid.put(this, row, col);
     }
   }
-  
+
   checkCollisionOnMove() {
-    let nextX = this.x + this.velX
-    let nextY = this.y + this.velY
+    let nextX = this.x + this.velX;
+    let nextY = this.y + this.velY;
 
     // Predict collision with the ground
-    if (nextY + this.width > grid.y + grid.height) return true
-    
+    if (nextY + this.width > grid.y + grid.height) return true;
+
     // Step through small intervals for better collision accuracy
     for (let stepY = this.y; stepY < nextY; stepY++) {
-
       // Predict collision with blocks
-      let collisionDetected = false 
-      grid.loopThroughItems((block) => {
-        if (!block || block === this) return; // Skip null blocks and self
-        if (block.gridPosition.row < this.gridPosition.row) return; // Skip blocks above
-        
-        // Check collision on vertical movement
-        if (nextY + this.width > block.y) 
-          collisionDetected = true
-      }, undefined, this.gridPosition.col);
-      
-      if (collisionDetected) return true
+      let collisionDetected = false;
+      grid.loopThroughItems(
+        (block) => {
+          if (!block || block === this) return; // Skip null blocks and self
+          if (block.gridPosition.row < this.gridPosition.row) return; // Skip blocks above
+
+          // Check collision on vertical movement
+          if (nextY + this.width > block.y) collisionDetected = true;
+        },
+        undefined,
+        this.gridPosition.col
+      );
+
+      if (collisionDetected) return true;
     }
-    
-    return false
+
+    return false;
   }
   isPointInside(x, y) {
     if (this.x < x && x < this.x2 && this.y < y && y < this.y2) return true;
@@ -302,20 +304,20 @@ class Block {
   pop() {
     // Remove from grid
     grid.spaces[this.gridPosition.row][this.gridPosition.col] = null;
-    
+
     this.state = "fading";
     this.on("fadeEnd", (ev) => {
       composition.remove(ev.target);
     });
-    
+
     // Try to insert a new block
     insertBlock();
-    
+
     // Activate fall animation on upper blocks
     grid.loopThroughItems(
       (item) => {
         if (!(item instanceof Block)) return; //console.log("não é bloco", item, row, col)
-        
+
         let { row, col } = item.gridPosition;
         if (row < this.gridPosition.row) {
           item.state = "falling";
@@ -347,7 +349,7 @@ class Block {
         break;
     }
 
-    this.y += this.velY
+    this.y += this.velY;
   }
   draw() {
     let x = this.x;
@@ -395,15 +397,9 @@ class Block {
     ctx.quadraticCurveTo(x + width, y + width, x45, y14);
     ctx.lineTo(x45, y05);
     ctx.fill();
-    //ctx.strokeStyle = "red"
-    //ctx.lineWidth = 2
-    //ctx.stroke()
     ctx.closePath();
 
     ctx.globalAlpha = 1;
-
-
-    ctx.strokeRect(this.x, this.y + this.velY, this.width, this.width)
   }
 }
 class Button {
@@ -486,22 +482,48 @@ function includeBlock() {
   block.animation.fall = true;
 
   composition.include(block, 3);
-}
-function insertBlock() {
-  console.count()
-  let col = Math.floor(Math.random() * grid.verLength);
-  
-  console.log(grid.spaces[0][col])
-  if (grid.spaces[0][col] === null) {
-    let block = new Block();
-    block.gridPosition.col = col;
-    block.gridPosition.row = 0;
-    block.relOrigin = grid;
-    block.relX = grid.spaceSize * col;
-    block.relY = 0;
-    block.state = "falling";
-    composition.include(block, 5);
+}function insertBlock() {
+  let col, attempts = 0;
+  const maxAttempts = 100; // Limit the number of atempts to avoid infinite loops
+
+  do {
+    col = Math.floor(Math.random() * grid.horLength);
+    let x = col * grid.spaceSize + grid.x;
+    let y = grid.y;
+
+    let overlap = false; 
+
+    for (let block of composition.instances["Block"]) {
+      if (
+        block.x - block.width < x &&
+        x < block.x + block.width * 2 &&
+        block.y - block.width < y &&
+        y < block.y + block.width * 2
+      ) {
+        overlap = true;
+        break;
+      }
+    }
+
+    if (!overlap) break;
+
+    attempts++;
+  } while (attempts < maxAttempts);
+
+  if (attempts >= maxAttempts) {
+    console.warn("Failed to find a valid column for the block.");
+    return;
   }
+
+  // Insert the block in the valid position
+  let block = new Block();
+  block.gridPosition.col = col;
+  block.gridPosition.row = 0;
+  block.relOrigin = grid;
+  block.relX = grid.spaceSize * col;
+  block.relY = 0;
+  block.state = "falling";
+  composition.include(block, 5);
 }
 
 // Events
