@@ -175,7 +175,7 @@ class Block {
 
     this.y += this.velY;
   }
-  draw() {
+  draw(ctx) {
     let x = this.x;
     let y = this.y;
     let width = this.width;

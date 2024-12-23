@@ -95,7 +95,7 @@ function game_loop() {
     for (let ii = 0; ii < layers[i].length; ii++) {
       if (layers[i][ii]) {
         if (layers[i][ii]?.update) layers[i][ii].update();
-        if (layers[i][ii]?.draw) layers[i][ii].draw();
+        if (layers[i][ii]?.draw) layers[i][ii].draw(ctx);
       }
     }
   }

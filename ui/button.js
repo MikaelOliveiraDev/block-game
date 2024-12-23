@@ -8,7 +8,7 @@ class Button {
     this.image = null;
   }
 
-  draw() {
+  draw(ctx) {
     let { x, y, width, height } = this;
     let radius = 10;
 

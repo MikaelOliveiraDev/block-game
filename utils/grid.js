@@ -106,7 +106,7 @@ grid.getGroup = function (startItem, groupCondition) {
   searchConnectedItems(startItem);
   return group;
 };
-grid.draw = function () {
+grid.draw = function (ctx) {
   ctx.fillStyle = "rgb(220, 229, 232)";
   ctx.fillRect(this.x, this.y, this.width, this.height);
 };
