@@ -83,8 +83,7 @@ function game_loop() {
   requestAnimationFrame(game_loop);
   //setTimeout(game_loop, 500)
 
-  ctx.fillStyle = "lightgreen";
-  ctx.fillRect(0, 0, canvas.width, canvas.height);
+  ctx.clearRect(0, 0, canvas.width, canvas.height);
 
   // Update and draw items of the composition
   let layers = composition.layers;
@@ -105,6 +104,10 @@ Block.grid = grid;
 Block.colors = ["#ef476f", "#ffc94d", "#06d6a0", "#118ab2", "#0b5a75"];
 Block.composition = composition;
 
+// Initialize canvas
+canvas.width = 600;
+canvas.height = 800;
+
 // Create UI buttons
 let backButton = new Button(5, 5, 50, 50);
 let retryButton = new Button(null, 5, 50, 50);
@@ -114,14 +117,10 @@ retryButton.image = document.querySelector("img.circular-arrow");
 composition.include(backButton, 7);
 composition.include(retryButton, 7);
 
-// Initialize canvas
-canvas.width = 500;
-canvas.height = 700;
-
 // Initialize grid
-grid.width = 400;
+grid.width = 420;
 grid.height = 600;
-grid.spaceSize = 50;
+grid.spaceSize = 60;
 
 grid.x = (canvas.width - grid.width) / 2;
 grid.y = (canvas.height - grid.height) / 2;
@@ -133,7 +132,7 @@ grid.createSpaces();
 composition.include(grid, 1);
 
 // Add initial blocks
-for (let row = grid.verLength - 1; row > grid.verLength - 4; row--) {
+for (let row = grid.verLength - 1; row > grid.verLength - 6; row--) {
   for (let col = 0; col < grid.horLength; col++) {
     let block = new Block();
     block.on("pop", insertBlock);
