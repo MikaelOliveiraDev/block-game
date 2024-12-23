@@ -78,6 +78,7 @@ function insertBlock() {
   block.relX = grid.spaceSize * col;
   block.relY = 0;
   block.state = "falling";
+  block.on("pop", insertBlock)
   composition.include(block, 5);
 }
 function game_loop() {
@@ -136,8 +137,8 @@ composition.include(grid, 1);
 // Add initial blocks
 for (let row = grid.verLength - 1; row > grid.verLength - 4; row--) {
   for (let col = 0; col < grid.horLength; col++) {
-    console.log(Block.grid)
     let block = new Block();
+    block.on("pop", insertBlock)
 
     grid.put(block, row, col);
     composition.include(block, 4);

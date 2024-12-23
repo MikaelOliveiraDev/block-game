@@ -126,6 +126,8 @@ class Block {
     if (this.x < x && x < this.x2 && this.y < y && y < this.y2) return true;
   }
   pop() {
+    this.emit("pop", this)
+
     // Remove from grid
     Block.grid.spaces[this.gridPosition.row][this.gridPosition.col] = null;
 
@@ -133,9 +135,6 @@ class Block {
     this.on("fadeEnd", (ev) => {
       Block.composition.remove(ev.target);
     });
-
-    // Try to insert a new block
-    insertBlock();
 
     // Activate fall animation on upper blocks
     Block.grid.loopThroughItems(
