@@ -1,10 +1,9 @@
-import grid from "./utils/grid.js";
 import composition from "./utils/composition.js";
+import grid from "./utils/grid.js";
 import Block from "./ui/block.js";
 import Button from "./ui/button.js";
 
 // Constants
-const COLORS = ["#ef476f", "#ffc94d", "#06d6a0", "#118ab2", "#0b5a75"];
 const canvas = document.querySelector("canvas");
 const ctx = canvas.getContext("2d");
 
@@ -103,6 +102,9 @@ function game_loop() {
 }
 
 // Initialization
+Block.grid = grid
+Block.colors = ["#ef476f", "#ffc94d", "#06d6a0", "#118ab2", "#0b5a75"];
+Block.composition = composition
 
 // Create UI buttons
 let backButton = new Button(5, 5, 50, 50);
@@ -134,6 +136,7 @@ composition.include(grid, 1);
 // Add initial blocks
 for (let row = grid.verLength - 1; row > grid.verLength - 4; row--) {
   for (let col = 0; col < grid.horLength; col++) {
+    console.log(Block.grid)
     let block = new Block();
 
     grid.put(block, row, col);

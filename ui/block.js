@@ -1,11 +1,11 @@
 class Block {
   constructor() {
-    this.width = grid.spaceSize - 4;
+    this.width = Block.grid.spaceSize - 4;
     this.relX = 2;
     this.relY = 2;
     this.relOrigin;
     this.gridPosition = { col: null, row: null };
-    this.color = COLORS[Math.floor(Math.random() * COLORS.length)];
+    this.color = Block.colors[Math.floor(Math.random() * Block.colors.length)];
     this.state = "idle";
     this.opacity = 1;
     this.eventListeners = {};
@@ -37,6 +37,9 @@ class Block {
   get y2() {
     return this.y + this.width;
   }
+
+  static grid;
+  static colors;
 
   // Methods for adding and emitting event listeners
   on(event, callback) {
@@ -84,15 +87,16 @@ class Block {
       this.velY = 0;
 
       // Snap to the grid
-      let col = Math.round(this.relX / grid.spaceSize);
-      let row = Math.round(this.relY / grid.spaceSize);
-      grid.put(this, row, col);
+      let col = Math.round(this.relX / Block.grid.spaceSize);
+      let row = Math.round(this.relY / Block.grid.spaceSize);
+      Block.grid.put(this, row, col);
     }
   }
 
   checkCollisionOnMove() {
     let nextX = this.x + this.velX;
     let nextY = this.y + this.velY;
+    let grid = Block.grid
 
     // Predict collision with the ground
     if (nextY + this.width > grid.y + grid.height) return true;
@@ -123,25 +127,25 @@ class Block {
   }
   pop() {
     // Remove from grid
-    grid.spaces[this.gridPosition.row][this.gridPosition.col] = null;
+    Block.grid.spaces[this.gridPosition.row][this.gridPosition.col] = null;
 
     this.state = "fading";
     this.on("fadeEnd", (ev) => {
-      composition.remove(ev.target);
+      Block.composition.remove(ev.target);
     });
 
     // Try to insert a new block
     insertBlock();
 
     // Activate fall animation on upper blocks
-    grid.loopThroughItems(
+    Block.grid.loopThroughItems(
       (item) => {
         if (!(item instanceof Block)) return; //console.log("não é bloco", item, row, col)
 
         let { row, col } = item.gridPosition;
         if (row < this.gridPosition.row) {
           item.state = "falling";
-          grid.spaces[row][col] = null;
+          Block.grid.spaces[row][col] = null;
         }
       },
       undefined,
@@ -151,7 +155,7 @@ class Block {
   click() {
     // Pop every block in the same color
     let color = this.color;
-    grid
+    Block.grid
       .getGroup(this, (item) => item.color === color)
       .forEach((block) => block.pop());
   }
