@@ -30,9 +30,8 @@ grid.put = function (item, row, col) {
   if (grid.spaces[row][col] !== null)
     console.error(`The grid position [${row}][${col}] is already occupied`);
 
-  item.relX = col * grid.spaceSize;
-  item.relY = row * grid.spaceSize;
-  item.relOrigin = grid;
+  item.x = grid.x + col * grid.spaceSize;
+  item.y = grid.y + row * grid.spaceSize;
   item.gridPosition.col = col;
   item.gridPosition.row = row;
 

@@ -29,9 +29,8 @@ function includeBlock() {
   let col = Math.floor(Math.random() * grid.horLength);
 
   let block = new Block();
-  block.relOrigin = grid;
-  block.relX = col * grid.spaceSize;
-  block.relY = -grid.spaceSize;
+  block.x = grid.x + col * grid.spaceSize;
+  block.y = grid.y - grid.spaceSize;
   block.animation.fall = true;
 
   composition.include(block, 3);
@@ -74,11 +73,10 @@ function insertBlock() {
   let block = new Block();
   block.gridPosition.col = col;
   block.gridPosition.row = 0;
-  block.relOrigin = grid;
-  block.relX = grid.spaceSize * col;
-  block.relY = 0;
+  block.x = grid.x + col * grid.spaceSize;
+  block.y = grid.y;
   block.state = "falling";
-  block.on("pop", insertBlock)
+  block.on("pop", insertBlock);
   composition.include(block, 5);
 }
 function game_loop() {
@@ -103,9 +101,9 @@ function game_loop() {
 }
 
 // Initialization
-Block.grid = grid
+Block.grid = grid;
 Block.colors = ["#ef476f", "#ffc94d", "#06d6a0", "#118ab2", "#0b5a75"];
-Block.composition = composition
+Block.composition = composition;
 
 // Create UI buttons
 let backButton = new Button(5, 5, 50, 50);
@@ -138,7 +136,7 @@ composition.include(grid, 1);
 for (let row = grid.verLength - 1; row > grid.verLength - 4; row--) {
   for (let col = 0; col < grid.horLength; col++) {
     let block = new Block();
-    block.on("pop", insertBlock)
+    block.on("pop", insertBlock);
 
     grid.put(block, row, col);
     composition.include(block, 4);

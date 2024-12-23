@@ -1,9 +1,8 @@
 class Block {
   constructor() {
     this.width = Block.grid.spaceSize - 4;
-    this.relX = 2;
-    this.relY = 2;
-    this.relOrigin;
+    this.x = null;
+    this.y = null;
     this.gridPosition = { col: null, row: null };
     this.color = Block.colors[Math.floor(Math.random() * Block.colors.length)];
     this.state = "idle";
@@ -11,31 +10,6 @@ class Block {
     this.eventListeners = {};
     this.velX = 0;
     this.velY = 0;
-  }
-
-  get x() {
-    let oriX = this.relOrigin?.x || 0;
-    let relX = this.relX;
-    return oriX + relX;
-  }
-  set x(x) {
-    let oriX = this.relOrigin.x || 0;
-    this.relX = x - oriX;
-  }
-  get y() {
-    let oriY = this.relOrigin?.y || 0;
-    let relY = this.relY;
-    return oriY + relY;
-  }
-  set y(y) {
-    let oriY = this.relOrigin?.y || 0;
-    this.relY = y - oriY;
-  }
-  get x2() {
-    return this.x + this.width;
-  }
-  get y2() {
-    return this.y + this.width;
   }
 
   static grid;
@@ -66,8 +40,8 @@ class Block {
 
     this.opacity -= 0.1;
     this.width += grow;
-    this.relX -= grow / 2;
-    this.relY -= grow / 2;
+    this.x -= grow / 2;
+    this.y -= grow / 2;
 
     if (this.opacity < 0) {
       this.opacity = 0;
@@ -87,8 +61,10 @@ class Block {
       this.velY = 0;
 
       // Snap to the grid
-      let col = Math.round(this.relX / Block.grid.spaceSize);
-      let row = Math.round(this.relY / Block.grid.spaceSize);
+      let x = this.x - Block.grid.x;
+      let y = this.y - Block.grid.y;
+      let col = Math.round(x / Block.grid.spaceSize);
+      let row = Math.round(y / Block.grid.spaceSize);
       Block.grid.put(this, row, col);
     }
   }
@@ -96,7 +72,7 @@ class Block {
   checkCollisionOnMove() {
     let nextX = this.x + this.velX;
     let nextY = this.y + this.velY;
-    let grid = Block.grid
+    let grid = Block.grid;
 
     // Predict collision with the ground
     if (nextY + this.width > grid.y + grid.height) return true;
@@ -123,10 +99,15 @@ class Block {
     return false;
   }
   isPointInside(x, y) {
-    if (this.x < x && x < this.x2 && this.y < y && y < this.y2) return true;
+    let x1 = this.x;
+    let x2 = this.x + this.width;
+    let y1 = this.y;
+    let y2 = this.y + this.width;
+    if (x1 < x && x < x2 && y1 < y && y < y2) return true;
+    else return false;
   }
   pop() {
-    this.emit("pop", this)
+    this.emit("pop", this);
 
     // Remove from grid
     Block.grid.spaces[this.gridPosition.row][this.gridPosition.col] = null;
