@@ -101,7 +101,7 @@ function game_loop() {
 
 // Initialization
 Block.grid = grid;
-Block.colors = ["#ef476f", "#ffc94d", "#06d6a0", "#118ab2", "#0b5a75"];
+Block.colors = ["#ef476f", "#ffc94d", "#06d6a0", "#118ab2"];
 Block.composition = composition;
 
 // Initialize canvas

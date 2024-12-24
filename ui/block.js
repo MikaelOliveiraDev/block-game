@@ -133,11 +133,12 @@ class Block {
     );
   }
   click() {
-    // Pop every block in the same color
     let color = this.color;
-    Block.grid
-      .getGroup(this, (item) => item.color === color)
-      .forEach((block) => block.pop());
+    let group = Block.grid.getGroup(this, block => block.color === color)
+
+    // Only pop if there is two or more of same color
+    if(group.length >= 2)
+      group.forEach((block) => block.pop());
   }
 
   update() {
