@@ -22,7 +22,11 @@ class Bar {
 
     // Draw the filled bar
     const percent = this.currentValue / this.maxValue;
-    const width = this.width * percent;
+    let width = this.width * percent;
+
+    // Prevent to be two small
+    if (width < 10) width = 10;
+
     ctx.beginPath();
     ctx.fillStyle = this.color;
     ctx.roundRect(this.x, this.y, width, this.height, radius);

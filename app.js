@@ -77,7 +77,10 @@ function insertBlock() {
   block.x = grid.x + col * grid.spaceSize;
   block.y = grid.y;
   block.state = "falling";
+
   block.on("pop", insertBlock);
+  block.on("pop", () => progressBar.currentValue++);
+
   composition.include(block, 5);
 }
 function game_loop() {
@@ -136,8 +139,8 @@ progressBar.width = grid.width;
 progressBar.height = 30;
 progressBar.x = grid.x;
 progressBar.y = grid.y - progressBar.height - 30;
-progressBar.maxValue = 100;
-progressBar.currentValue = 50;
+progressBar.maxValue = 1000;
+progressBar.currentValue = 0;
 
 composition.include(grid, 1);
 composition.include(progressBar, 1);
@@ -147,6 +150,7 @@ for (let row = grid.verLength - 1; row > grid.verLength - 6; row--) {
   for (let col = 0; col < grid.horLength; col++) {
     let block = new Block();
     block.on("pop", insertBlock);
+    block.on("pop", () => progressBar.currentValue++);
 
     grid.put(block, row, col);
     composition.include(block, 4);
