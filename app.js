@@ -2,6 +2,7 @@ import composition from "./utils/composition.js";
 import grid from "./utils/grid.js";
 import Block from "./ui/block.js";
 import Button from "./ui/button.js";
+import Bar from "./ui/bar.js";
 
 // Constants
 const canvas = document.querySelector("canvas");
@@ -123,13 +124,23 @@ grid.height = 600;
 grid.spaceSize = 60;
 
 grid.x = (canvas.width - grid.width) / 2;
-grid.y = (canvas.height - grid.height) / 2;
+grid.y = canvas.height - grid.height - 40;
 grid.horLength = Math.floor(grid.width / grid.spaceSize);
 grid.verLength = Math.floor(grid.height / grid.spaceSize);
 
 grid.createSpaces();
 
+// Create progress bar
+const progressBar = new Bar();
+progressBar.width = grid.width;
+progressBar.height = 30;
+progressBar.x = grid.x;
+progressBar.y = grid.y - progressBar.height - 30;
+progressBar.maxValue = 100;
+progressBar.currentValue = 50;
+
 composition.include(grid, 1);
+composition.include(progressBar, 1);
 
 // Add initial blocks
 for (let row = grid.verLength - 1; row > grid.verLength - 6; row--) {

@@ -106,7 +106,7 @@ grid.getGroup = function (startItem, groupCondition) {
   return group;
 };
 grid.draw = function (ctx) {
-  ctx.fillStyle = "rgb(220, 229, 232)";
+  ctx.fillStyle = "hsl(195, 20.70%, 88.60%)";
   ctx.fillRect(this.x, this.y, this.width, this.height);
 };
 
